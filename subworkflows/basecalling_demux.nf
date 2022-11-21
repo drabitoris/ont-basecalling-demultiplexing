@@ -34,8 +34,8 @@ process basecalling {
   label 'guppy'
   label 'gpu'
   publishDir "${params.output_dir}/guppy_info/", \
-    mode: 'copy', \
-    pattern: 'sequencing_summary.txt'
+    pattern: 'basecalled/sequencing_summary.txt', \
+    mode: 'copy'
   clusterOptions = "--gres=gpu:${params.ngpus}"
   cpus params.guppy_cpus
   
@@ -64,7 +64,7 @@ process basecalling {
 process demultiplexing {
   label 'guppy'
   publishDir "${params.output_dir}/guppy_info/", \
-    pattern: 'barcoding_summary.txt', \
+    pattern: 'demultiplexed/barcoding_summary.txt', \
     mode: 'copy'
   cpus params.guppy_cpus
 
