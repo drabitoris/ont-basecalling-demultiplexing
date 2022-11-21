@@ -8,7 +8,7 @@ workflow BasecallingAndDemux {
 
     basecalling.out.pass_fail
       | flatten
-      | map { [it.simpleName, it] }
+      | map { ["_all_${it.simpleName}", it] }
       | set { sequences_to_merge }
 
     if (params.skip_demultiplexing) {
