@@ -5,11 +5,14 @@ sample_names_replace:
   pass: .all_pass
   fail: .all_fail
 show_hide_buttons:
-  - Demultiplexed
   - Not Demultiplexed
+  - Demultiplexed
+  - Classified
 show_hide_mode:
-  - hide
   - show
+  - hide
+  - hide
 show_hide_patterns:
   - [".all_pass", ".all_fail"]
   - [".all_pass", ".all_fail"]
+  - [".all_pass", ".all_fail", "unclassified"]
