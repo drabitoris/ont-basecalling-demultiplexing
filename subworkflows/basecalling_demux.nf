@@ -6,15 +6,15 @@ workflow BasecallingAndDemux {
   main:
     basecalling(fast5_dir)
 
-    basecalling.out.pass_fail
-      | flatten
+    basecalling.out.fastq_pass
+      | mix(basecalling.out.fastq_fail)
       | map { [it.simpleName, it] }
       | set { sequences_to_merge }
 
     if (params.skip_demultiplexing) {
       mergeSequences(sequences_to_merge)
     } else {
-      demultiplexing(basecalling.out.all)
+      demultiplexing(basecalling.out.fastq_pass)
 
       demultiplexing.out.classified
         | flatMap { it.collect { x -> [x.simpleName, x] } }
@@ -32,20 +32,19 @@ workflow BasecallingAndDemux {
 
 process basecalling {
   label 'guppy'
-  label 'gpu'
   publishDir "${params.output_dir}/guppy_info/", \
     pattern: 'basecalled/sequencing_summary.txt', \
-    saveAs: 'sequencing_summary.txt', \
+    saveAs: { 'sequencing_summary.txt' }, \
     mode: 'copy'
   clusterOptions = "--gres=gpu:${params.ngpus}"
   cpus params.guppy_cpus
-  
+
   input:
   path(fast5_dir)
 
   output:
-  path('basecalled/'), emit: all
-  path('basecalled/{pass,fail}'), emit: pass_fail
+  path('basecalled/pass'), emit: fastq_pass
+  path('basecalled/fail'), emit: fastq_fail
   path('basecalled/sequencing_summary.txt'), emit: sequencing_summary
 
   script:
@@ -66,7 +65,7 @@ process demultiplexing {
   label 'guppy'
   publishDir "${params.output_dir}/guppy_info/", \
     pattern: 'demultiplexed/barcoding_summary.txt', \
-    saveAs: 'barcoding_summary.txt', \
+    saveAs: { 'barcoding_summary.txt' }, \
     mode: 'copy'
   cpus params.guppy_cpus
 
@@ -77,12 +76,12 @@ process demultiplexing {
   path('demultiplexed/barcode*'), emit: classified
   path('demultiplexed/unclassified'), emit: unclassified
   path('demultiplexed/barcoding_summary.txt'), emit: barcoding_summary
-  
+
   script:
   both_ends = params.guppy_barcoding_both_ends ? '--require_barcodes_both_ends' : ''
   """
   guppy_barcoder \
-    --input_path ${fastq_dir}/pass \
+    --input_path ${fastq_dir} \
     --save_path demultiplexed/ \
     --recursive \
     --barcode_kits "${params.guppy_barcoding_kits}" \
