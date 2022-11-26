@@ -16,7 +16,11 @@ process fastQC {
   label 'fastqc'
   tag "${name}"
   publishDir "${params.output_dir}/qc/fastqc", mode: 'copy'
-  cpus 8
+  cpus { 8 * task.attempt }
+  memory { 16.GB * task.attempt }
+  time '30m'
+  errorStrategy 'retry'
+  maxRetries 3
 
   input:
   tuple val(name), path(fastq)
