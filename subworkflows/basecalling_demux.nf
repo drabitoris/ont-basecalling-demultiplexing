@@ -36,7 +36,7 @@ process basecalling {
     pattern: 'basecalled/sequencing_summary.txt', \
     saveAs: { 'sequencing_summary.txt' }, \
     mode: 'copy'
-  clusterOptions = "--gres=gpu:${params.ngpus}"
+  clusterOptions = "--gres=gpu:${params.guppy_basecalling_gpus}"
   cpus params.guppy_basecalling_cpus
   
   input:
