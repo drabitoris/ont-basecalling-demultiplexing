@@ -1,11 +1,12 @@
 fast5_dir: input/fast5/
 sample_data: input/samples.csv
 output_dir: demultiplex_results/
-guppy_cpus: 32
 ngpus: 2
 guppy_basecalling_config: dna_r9.4.1_450bps_sup.cfg
 guppy_basecalling_extra_config: ''
+guppy_basecalling_cpus: 32
 skip_demultiplexing: false
 guppy_barcoding_kits: EXP-NBD196
 guppy_barcoding_both_ends: false
 guppy_barcoding_extra_config: ''
+guppy_barcoding_cpus: 24

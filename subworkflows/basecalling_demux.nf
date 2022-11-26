@@ -37,8 +37,8 @@ process basecalling {
     saveAs: { 'sequencing_summary.txt' }, \
     mode: 'copy'
   clusterOptions = "--gres=gpu:${params.ngpus}"
-  cpus params.guppy_cpus
-
+  cpus params.guppy_basecalling_cpus
+  
   input:
   path(fast5_dir)
 
@@ -67,7 +67,7 @@ process demultiplexing {
     pattern: 'demultiplexed/barcoding_summary.txt', \
     saveAs: { 'barcoding_summary.txt' }, \
     mode: 'copy'
-  cpus params.guppy_cpus
+  cpus params.guppy_barcoding_cpus
 
   input:
   path(fastq_dir)
@@ -85,7 +85,7 @@ process demultiplexing {
     --save_path demultiplexed/ \
     --recursive \
     --barcode_kits "${params.guppy_barcoding_kits}" \
-    $both_ends \
+    ${both_ends} \
     --detect_adapter \
     --detect_barcodes \
     --worker_threads ${task.cpus} \
