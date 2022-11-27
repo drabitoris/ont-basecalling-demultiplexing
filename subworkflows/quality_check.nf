@@ -2,7 +2,7 @@ workflow QualityCheck {
   take:
     fastq_files         // channel [name, fastq]
     sequencing_summary  // sequencing summary file
-    barconding_summary  // barcoding summary file
+    barcoding_summary   // barcoding summary file
 
   main:
     pycoQC(sequencing_summary, barcoding_summary)
@@ -77,10 +77,13 @@ process pycoQC {
   path("pycoQC_report.json"), emit: json
   
   script:
+  barcoding_opt = barcoding_summary.name != 'NO_FILE'
+    ? "-b ${barcoding_summary}"
+    : ''
   """
   pycoQC \
     -f ${sequencing_summary} \
-    -b ${barcoding_summary} \
+    ${barcoding_opt} \
     -o pycoQC_report.html \
     -j pycoQC_report.json
   """
