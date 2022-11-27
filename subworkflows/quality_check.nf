@@ -65,7 +65,7 @@ process nanoPlot {
 
 process pycoQC {
   label 'pycoqc'
-  publishDir "${params.output_dir}/qc/pycoQC", mode: 'copy'
+  publishDir "${params.output_dir}/qc/pycoqc", mode: 'copy'
 
   input:
   path(sequencing_summary)
