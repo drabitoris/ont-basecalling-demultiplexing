@@ -11,7 +11,6 @@ workflow QualityCheck {
       | (fastQC & nanoPlot)
       | mix
       | map { it[1] }
-      | mix(pycoQC.out.json)
       | collect
       | multiQC
 }
@@ -73,8 +72,7 @@ process pycoQC {
   path(barcoding_summary)
   
   output:
-  path("pycoQC_report.html"), emit: html
-  path("pycoQC_report.json"), emit: json
+  path("pycoQC_report.html")
   
   script:
   barcoding_opt = barcoding_summary.name != 'NO_FILE'
