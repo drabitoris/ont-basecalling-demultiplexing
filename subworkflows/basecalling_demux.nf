@@ -26,7 +26,9 @@ workflow BasecallingAndDemux {
     }
 
   emit:
-    mergeSequences.out
+    sequences = mergeSequences.out
+    sequencing_summary = basecalling.out.sequencing_summary
+    barcoding_summary = params.skip_demultiplexing ? null : demultiplexing.out.barcoding_summary
 }
 
 
