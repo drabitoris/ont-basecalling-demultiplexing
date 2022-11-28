@@ -1,3 +1,4 @@
+experiment_name: ''
 fast5_dir: input/fast5/
 sample_data: input/samples.csv
 output_dir: demultiplex_results/

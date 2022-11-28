@@ -75,6 +75,9 @@ process pycoQC {
   path("pycoQC_report.html")
   
   script:
+  title_opt = params.experiment_name
+    ? "--report_title '${params.experiment_name} Sequencing Report'"
+    : ''
   barcoding_opt = barcoding_summary.name != 'NO_FILE'
     ? "-b ${barcoding_summary}"
     : ''
@@ -82,6 +85,7 @@ process pycoQC {
   pycoQC \
     -f ${sequencing_summary} \
     ${barcoding_opt} \
+    ${title_opt} \
     -o pycoQC_report.html
   """
 }
@@ -98,8 +102,11 @@ process multiQC {
   tuple path('multiqc_data'), path('multiqc_report.html')
 
   script:
+  title_opt = params.experiment_name
+    ? "--title '${params.experiment_name} Report'"
+    : ''
   """
   cp ${workflow.projectDir}/conf/multiqc_config.yaml .
-  multiqc .
+  multiqc ${title_opt} .
   """
 }
