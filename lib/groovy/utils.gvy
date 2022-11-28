@@ -34,3 +34,7 @@ def isEmpty(params, name) {
 def getParamValue(params, name, defaultValue) {
   return isEmpty(params, name) ? defaultValue : params[name]
 }
+
+def sanitizeFilename(filename) {
+  return filename.toLowerCase().replaceAll(' ', '_').replaceAll('[^a-z0-9_-.]', '')
+}

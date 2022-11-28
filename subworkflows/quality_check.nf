@@ -1,3 +1,6 @@
+include { sanitizeFilename } from '../lib/groovy/utils.gvy'
+
+
 workflow QualityCheck {
   take:
     fastq_files         // channel [name, fastq]
@@ -99,14 +102,17 @@ process multiQC {
   path(fastqc_reports)
 
   output:
-  tuple path('*multiqc_data'), path('*multiqc_report.html')
+  tuple path('*multiqc_data'), path('*multiqc.html')
 
   script:
-  title_opt = params.experiment_name
-    ? "--title '${params.experiment_name} Report'"
-    : ''
+  if (params.experiment_name) {
+    filename = sanitizeFilename("${params.experiment_name}_multiqc")
+    title_opts = "--title '${params.experiment_name} Report' --filename ${filename}"
+  } else {
+    title_opts = ''
+  }
   """
   cp ${workflow.projectDir}/conf/multiqc_config.yaml .
-  multiqc ${title_opt} .
+  multiqc ${title_opts} .
   """
 }
