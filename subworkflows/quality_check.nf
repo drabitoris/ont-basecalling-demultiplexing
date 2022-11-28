@@ -82,8 +82,7 @@ process pycoQC {
   pycoQC \
     -f ${sequencing_summary} \
     ${barcoding_opt} \
-    -o pycoQC_report.html \
-    -j pycoQC_report.json
+    -o pycoQC_report.html
   """
 }
 
