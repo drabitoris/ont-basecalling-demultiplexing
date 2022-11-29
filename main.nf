@@ -19,5 +19,9 @@ sample_names = channel
 
 workflow {
   BasecallingAndDemux(sample_names, fast5_dir)
-    | QualityCheck
+  QualityCheck(
+    BasecallingAndDemux.out.sequences,
+    BasecallingAndDemux.out.sequencing_summary,
+    BasecallingAndDemux.out.barcoding_summary
+  )
 }

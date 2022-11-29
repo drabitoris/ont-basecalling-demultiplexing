@@ -26,7 +26,11 @@ workflow BasecallingAndDemux {
     }
 
   emit:
-    mergeSequences.out
+    sequences = mergeSequences.out
+    sequencing_summary = basecalling.out.sequencing_summary
+    barcoding_summary = params.skip_demultiplexing 
+      ? file('NO_FILE')
+      : demultiplexing.out.barcoding_summary
 }
 
 
@@ -36,9 +40,9 @@ process basecalling {
     pattern: 'basecalled/sequencing_summary.txt', \
     saveAs: { 'sequencing_summary.txt' }, \
     mode: 'copy'
-  clusterOptions = "--gres=gpu:${params.ngpus}"
-  cpus params.guppy_cpus
-
+  clusterOptions = "--gres=gpu:${params.guppy_basecalling_gpus}"
+  cpus params.guppy_basecalling_cpus
+  
   input:
   path(fast5_dir)
 
@@ -67,7 +71,7 @@ process demultiplexing {
     pattern: 'demultiplexed/barcoding_summary.txt', \
     saveAs: { 'barcoding_summary.txt' }, \
     mode: 'copy'
-  cpus params.guppy_cpus
+  cpus params.guppy_barcoding_cpus
 
   input:
   path(fastq_dir)
@@ -85,7 +89,7 @@ process demultiplexing {
     --save_path demultiplexed/ \
     --recursive \
     --barcode_kits "${params.guppy_barcoding_kits}" \
-    $both_ends \
+    ${both_ends} \
     --detect_adapter \
     --detect_barcodes \
     --worker_threads ${task.cpus} \
