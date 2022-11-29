@@ -98,7 +98,7 @@ process mergeSequences {
   label 'linux'
   tag "${name}"
   publishDir "${params.output_dir}/fastq/", \
-    pattern: '^(pass|fail|unclassified)', \
+    pattern: '[!pass|fail|unclassified]*.fastq', \
     mode: 'copy'
 
   input:
