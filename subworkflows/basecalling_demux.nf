@@ -23,6 +23,8 @@ workflow BasecallingAndDemux {
         | mix(demultiplexing.out.unclassified.map { ['unclassified', it] })
         | mix(sequences_to_merge)
         | mergeSequences
+        | filter { !['unclassified', 'pass', 'fail'].contains(it[0]) }
+        | compressSequences
     }
 
   emit:
@@ -101,9 +103,6 @@ process demultiplexing {
 process mergeSequences {
   label 'linux'
   tag "${name}"
-  publishDir "${params.output_dir}/fastq/", \
-    pattern: '[!pass|fail|unclassified]*.fastq', \
-    mode: 'copy'
 
   input:
   tuple val(name), path(fastq_dir)
@@ -114,5 +113,24 @@ process mergeSequences {
   script:
   """
   cat ${fastq_dir}/*.fastq > ${name}.fastq
+  """
+}
+
+
+process compressSequences {
+  label 'pigz'
+  tag "${name}"
+  publishDir "${params.output_dir}/fastq/", mode: 'copy'
+  cpus 4
+
+  input:
+  tuple val(name), path(fastq)
+  
+  output:
+  tuple val(name), path("${name}.fastq.gz")
+  
+  script:
+  """
+  pigz -p ${task.cpus} -c ${fastq} > ${name}.fastq.gz
   """
 }
