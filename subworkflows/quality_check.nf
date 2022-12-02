@@ -69,14 +69,16 @@ process nanoPlot {
 process pycoQC {
   label 'pycoqc'
   publishDir "${params.output_dir}/qc/pycoqc", mode: 'copy'
-  memory 8.GB
+  memory { 8.GB * task.attempt }
+  errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+  maxRetries 5
 
   input:
   path(sequencing_summary)
   path(barcoding_summary)
   
   output:
-  path("pycoQC_report.html")
+  path('pycoQC_report.html')
   
   script:
   title_opt = params.experiment_name
