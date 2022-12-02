@@ -69,6 +69,7 @@ process nanoPlot {
 process pycoQC {
   label 'pycoqc'
   publishDir "${params.output_dir}/qc/pycoqc", mode: 'copy'
+  memory 8.GB
 
   input:
   path(sequencing_summary)
