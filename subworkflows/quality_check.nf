@@ -6,6 +6,7 @@ workflow QualityCheck {
     fastq_files         // channel [name, fastq]
     sequencing_summary  // sequencing summary file
     barcoding_summary   // barcoding summary file
+    multiqc_config      // multiqc config file
 
   main:
     pycoQC(sequencing_summary, barcoding_summary)
@@ -15,6 +16,10 @@ workflow QualityCheck {
       | mix
       | map { it[1] }
       | collect
+      | mulitMap {
+        reports: it
+        multiqc_config: multiqc_config
+      }
       | multiQC
 }
 
@@ -102,7 +107,8 @@ process multiQC {
   publishDir "${params.output_dir}/qc/multiqc", mode: 'copy'
   
   input:
-  path(fastqc_reports)
+  path(reports, stageAs: 'reports/*')
+  path('multiqc_config.yaml')
 
   output:
   tuple path('*multiqc_data'), path('*multiqc*.html')
@@ -115,7 +121,6 @@ process multiQC {
     title_opts = ''
   }
   """
-  cp ${workflow.projectDir}/conf/multiqc_config.yaml .
-  multiqc ${title_opts} .
+  multiqc ${title_opts} reports
   """
 }
