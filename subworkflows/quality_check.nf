@@ -17,9 +17,9 @@ workflow QualityCheck {
       | map { it[1] }
       | collect
       | multiMap {
-        reports: it
-        multiqc_config: multiqc_config
-      }
+          reports: it
+          multiqc_config: multiqc_config
+        }
       | multiQC
 }
 
