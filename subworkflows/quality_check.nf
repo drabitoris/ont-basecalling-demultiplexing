@@ -102,7 +102,7 @@ process multiQC {
   path(fastqc_reports)
 
   output:
-  tuple path('*multiqc_data'), path('*multiqc.html')
+  tuple path('*multiqc_data'), path('*multiqc*.html')
 
   script:
   if (params.experiment_name) {
