@@ -12,12 +12,16 @@ include { QualityCheck }        from './subworkflows/quality_check.nf'
 // check and prepare input channels
 fast5_dir = pathCheck(params.fast5_dir, isDirectory = true)
 multiqc_config = pathCheck("${workflow.projectDir}/conf/multiqc_config.yaml")
-pathCheck(params.sample_data)
-sample_names = channel
-  .fromPath(params.sample_data)
-  .splitCsv(header: true)
-  .map { row -> [row.barcode, row.sample] }
 
+if (params.skip_demultiplexing) {
+  sample_names = channel.fromList([])
+} else {
+  pathCheck(params.sample_data)
+  sample_names = channel
+    .fromPath(params.sample_data)
+    .splitCsv(header: true)
+    .map { row -> [row.barcode, row.sample] }
+}
 
 workflow {
   BasecallingAndDemux(sample_names, fast5_dir)
