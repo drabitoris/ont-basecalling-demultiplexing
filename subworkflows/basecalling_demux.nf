@@ -102,6 +102,10 @@ process demultiplexing {
 
 process mergeSequences {
   label 'linux'
+  publishDir "${params.output_dir}/basecalled/", \
+    pattern: '*.fastq', \
+    mode: 'copy', \
+    enabled: params.skip_demultiplexing
   tag "${name}"
 
   input:
