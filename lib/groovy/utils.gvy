@@ -54,3 +54,7 @@ def getParamValue(params, name, defaultValue) {
 def sanitizeFilename(filename) {
   return filename.toLowerCase().replaceAll(' ', '_').replaceAll('[^a-z0-9._-]', '')
 }
+
+def throwError(msg) {
+  exit 1, "ERROR: $msg"
+}
