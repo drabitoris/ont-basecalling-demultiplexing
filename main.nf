@@ -10,7 +10,7 @@ include { QualityCheck }        from './subworkflows/quality_check.nf'
 
 
 // check and prepare input channels
-fast5_dir = pathCheck(params.fast5_dir, isDirectory = true)
+data_dir = pathCheck(params.data_dir, isDirectory = true)
 multiqc_config = pathCheck("${workflow.projectDir}/conf/multiqc_config.yaml")
 
 if (params.skip_demultiplexing) {
@@ -24,7 +24,7 @@ if (params.skip_demultiplexing) {
 }
 
 workflow {
-  BasecallingAndDemux(sample_names, fast5_dir)
+  BasecallingAndDemux(sample_names, data_dir)
   QualityCheck(
     BasecallingAndDemux.out.sequences,
     BasecallingAndDemux.out.sequencing_summary,

@@ -1,10 +1,10 @@
 workflow BasecallingAndDemux {
   take:
     sample_names  // channel [barcode, sample]
-    fast5_dir     // directory containing FAST5 files
+    data_dir      // directory containing POD5/FAST5 files
 
   main:
-    basecalling(fast5_dir)
+    basecalling(data_dir)
 
     basecalling.out.fastq_pass
       | mix(basecalling.out.fastq_fail)
@@ -46,7 +46,7 @@ process basecalling {
   cpus params.guppy_basecalling_cpus
   
   input:
-  path(fast5_dir)
+  path(data_dir)
 
   output:
   path('basecalled/pass'), emit: fastq_pass
@@ -56,7 +56,7 @@ process basecalling {
   script:
   """
   guppy_basecaller \
-    --input_path ${fast5_dir} \
+    --input_path ${data_dir} \
     --save_path basecalled \
     --config ${params.guppy_basecalling_config} \
     --recursive \
@@ -92,6 +92,7 @@ process demultiplexing {
     --recursive \
     --barcode_kits "${params.guppy_barcoding_kits}" \
     ${both_ends} \
+    --enable_trim_barcodes \
     --detect_adapter \
     --detect_barcodes \
     --worker_threads ${task.cpus} \

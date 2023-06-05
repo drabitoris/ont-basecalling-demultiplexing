@@ -1,5 +1,5 @@
 experiment_name: ''
-fast5_dir: input/fast5/
+data_dir: input/pod5/
 sample_data: input/samples.csv
 output_dir: demultiplex_results/
 guppy_basecalling_config: dna_r9.4.1_450bps_sup.cfg
