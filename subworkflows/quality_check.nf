@@ -3,24 +3,21 @@ include { sanitizeFilename } from '../lib/groovy/utils.gvy'
 
 workflow QualityCheck {
   take:
-    fastq_files         // channel [name, fastq]
+    sequences           // channel [name, fastq]
     sequencing_summary  // sequencing summary file
-    barcoding_summary   // barcoding summary file
-    multiqc_config      // multiqc config file
 
   main:
-    pycoQC(sequencing_summary, barcoding_summary)
+    pycoQC(sequencing_summary)
 
-    fastq_files
+    sequences
       | (fastQC & nanoPlot)
       | mix
       | map { it[1] }
       | collect
-      | multiMap {
-          reports: it
-          multiqc_config: multiqc_config
-        }
-      | multiQC
+      | set { reports }
+
+  emit:
+    software_reports = reports
 }
 
 
@@ -28,14 +25,13 @@ process fastQC {
   label 'fastqc'
   tag "${name}"
   publishDir "${params.output_dir}/qc/fastqc", mode: 'copy'
-  cpus { 8 * task.attempt }
-  memory { 16.GB * task.attempt }
-  time '30m'
+  cpus { 4 * task.attempt }
+  memory { 8.GB * task.attempt }
   errorStrategy 'retry'
   maxRetries 3
 
   input:
-  tuple val(name), path(fastq)
+  tuple val(name), path(reads)
 
   output:
   tuple val(name), path("fastqc_${name}")
@@ -43,7 +39,10 @@ process fastQC {
   script:
   """
   mkdir fastqc_${name}
-  fastqc ${fastq} -o fastqc_${name} -t ${task.cpus}
+  fastqc \
+    ${reads} \
+    -o fastqc_${name} \
+    -t ${task.cpus} --memory ${task.memory.toGiga()}GB
   """
 }
 
@@ -55,15 +54,16 @@ process nanoPlot {
   cpus 4
 
   input:
-  tuple val(name), path(fastq)
+  tuple val(name), path(reads)
 
   output:
   tuple val(name), path("nanoplot_${name}")
 
   script:
+  file_opt = reads.name.endsWith('.ubam') ? '--ubam' : '--fastq'
   """
   NanoPlot \
-    --fastq ${fastq} \
+    ${file_opt} ${reads} \
     --outdir nanoplot_${name} \
     --prefix ${name}_ \
     --threads ${task.cpus}
@@ -80,7 +80,6 @@ process pycoQC {
 
   input:
   path(sequencing_summary)
-  path(barcoding_summary)
   
   output:
   path('pycoQC_report.html')
@@ -89,38 +88,10 @@ process pycoQC {
   title_opt = params.experiment_name
     ? "--report_title '${params.experiment_name} Sequencing Report'"
     : ''
-  barcoding_opt = barcoding_summary.name != 'NO_FILE'
-    ? "-b ${barcoding_summary}"
-    : ''
   """
   pycoQC \
     -f ${sequencing_summary} \
-    ${barcoding_opt} \
     ${title_opt} \
     -o pycoQC_report.html
-  """
-}
-
-
-process multiQC {
-  label 'multiqc'
-  publishDir "${params.output_dir}/qc/multiqc", mode: 'copy'
-  
-  input:
-  path(reports, stageAs: 'reports/*')
-  path('multiqc_config.yaml')
-
-  output:
-  tuple path('*multiqc_data'), path('*multiqc*.html')
-
-  script:
-  if (params.experiment_name) {
-    filename = sanitizeFilename("${params.experiment_name}_multiqc")
-    title_opts = "--title '${params.experiment_name} Report' --filename ${filename}"
-  } else {
-    title_opts = ''
-  }
-  """
-  multiqc ${title_opts} reports
   """
 }
