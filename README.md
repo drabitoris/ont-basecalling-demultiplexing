@@ -17,7 +17,7 @@ It uses Dorado for basecalling and demultiplexing.
 - Run the pipeline passing your params file to `-params-file` option:
 
 ```
-nextflow run ont-basecalling-demultiplexing/ -params-file my_params.yml
+nextflow run ont-basecalling-demultiplexing/ -profile apptainer -params-file my_params.yml
 ```
 
 ## Parameters
@@ -42,7 +42,7 @@ nextflow run ont-basecalling-demultiplexing/ -params-file my_params.yml
 
 ## Considerations
 
-- It is possible to run the pipeline either in SLURM clusters using `--profile slurm`.
+- It is possible to run the pipeline either in SLURM clusters using `-profile slurm`.
 - Basecalling and demultiplexing are performed on separated steps to allow for a better control of the resources used by each process, and to prevent a whole basecalling redo in case of a failure during demultiplexing, wrong kit specified, etc.
 - The basecalling process uses GPU, so make sure to have one available. If using SLURM, the job will be submitted with `--gres=gpu:X` option.
 - Demultiplexing step won't use GPU, only CPU.
