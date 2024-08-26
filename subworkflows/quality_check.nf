@@ -1,16 +1,13 @@
-include { sanitizeFilename } from '../lib/groovy/utils.gvy'
+include { slugify } from '../lib/groovy/utils.gvy'
 
 
 workflow QualityCheck {
   take:
-    sequences           // channel [name, fastq]
-    sequencing_summary  // sequencing summary file
+    sequences   // channel [name, fastq]
 
   main:
-    pycoQC(sequencing_summary)
-
     sequences
-      | (fastQC & nanoPlot)
+      | (fastQC & nanoPlot & nanoq)
       | mix
       | map { it[1] }
       | collect
@@ -23,12 +20,15 @@ workflow QualityCheck {
 
 process fastQC {
   label 'fastqc'
-  tag "${name}"
+  tag { name }
   publishDir "${params.output_dir}/qc/fastqc", mode: 'copy'
   cpus { 4 * task.attempt }
   memory { 8.GB * task.attempt }
   errorStrategy 'retry'
   maxRetries 3
+
+  when:
+  'fastqc' in params.qc_tools
 
   input:
   tuple val(name), path(reads)
@@ -49,9 +49,12 @@ process fastQC {
 
 process nanoPlot {
   label 'nanoplot'
-  tag "${name}"
+  tag { name }
   publishDir "${params.output_dir}/qc/nanoplot", mode: 'copy'
   cpus 4
+
+  when:
+  'nanoplot' in params.qc_tools
 
   input:
   tuple val(name), path(reads)
@@ -71,27 +74,23 @@ process nanoPlot {
 }
 
 
-process pycoQC {
-  label 'pycoqc'
-  publishDir "${params.output_dir}/qc/pycoqc", mode: 'copy'
-  memory { 8.GB * task.attempt }
-  errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-  maxRetries 5
+process nanoq {
+  label 'nanoq'
+  tag { name }
+  publishDir "${params.output_dir}/qc/nanoq", mode: 'copy'
+  cpus 1
+
+  when:
+  'nanoq' in params.qc_tools
 
   input:
-  path(sequencing_summary)
+  tuple val(name), path(reads)
   
   output:
-  path('pycoQC_report.html')
+  tuple val(name), path("${name}.txt")
   
   script:
-  title_opt = params.experiment_name
-    ? "--report_title '${params.experiment_name} Sequencing Report'"
-    : ''
   """
-  pycoQC \
-    -f ${sequencing_summary} \
-    ${title_opt} \
-    -o pycoQC_report.html
+  nanoq -svv -i ${reads} > ${name}.txt
   """
 }

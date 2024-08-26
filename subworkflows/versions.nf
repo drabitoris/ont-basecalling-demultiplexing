@@ -1,24 +1,22 @@
 workflow CollectVersions {
+  take:
+    basecalled_ubam
+
   main:
-      dorado()
-        | mix(samtools())
-        | mix(fastQC())
-        | mix(nanoPlot())
-        | mix(pycoQC())
-        | set { software_versions }
+    (dorado & samtools & fastQC & nanoq & nanoPlot & pycoQC & toulligQC)
+      | mix
+      | set { software_versions }
 
-      software_versions
-        | map { it.text }
-        | collectFile(
-            name: 'software_versions.yaml',
-            newLine: false,
-            sort: true
-          )
+    software_versions
+      | collectFile( name: 'software_versions.yaml', newLine: true, sort: true) {
+          "${it[0]}: \"${it[1]}\""
+        }
+      | set { software_versions_combined }
 
-      doradoModel()
+    doradoModel(basecalled_ubam)
   
   emit:
-    software_versions = software_versions.collect()
+    software_versions = software_versions_combined
     model_versions = doradoModel.out
 }
 
@@ -27,12 +25,11 @@ process dorado {
   label 'dorado'
 
   output:
-  path('dorado_version.yaml')
+  tuple val('Dorado'), stdout
 
   script:
   """
-  version=\$(dorado --version 2>&1)
-  echo "Dorado: '\$version'" > dorado_version.yaml
+  dorado --version 2>&1 | tr -d '\n'
   """
 }
 
@@ -41,12 +38,11 @@ process samtools {
   label 'samtools'
 
   output:
-  path('samtools_version.yaml')
+  tuple val('Samtools'), stdout
 
   script:
   """
-  version=\$(samtools --version | head -n 1 | grep -Eo '[0-9.]+')
-  echo "Samtools: '\$version'" > samtools_version.yaml
+  samtools --version | head -n 1 | grep -Eo '[0-9.]+' | tr -d '\n'
   """
 }
 
@@ -54,13 +50,15 @@ process samtools {
 process fastQC {
   label 'fastqc'
 
+  when:
+  'fastqc' in params.qc_tools
+
   output:
-  path('fastqc_version.yaml')
+  tuple val('FastQC'), stdout
 
   script:
   """
-  version=\$(fastqc --version | grep -Eo '[0-9.]+')
-  echo "FastQC: '\$version'" > fastqc_version.yaml
+  fastqc --version | grep -Eo '[0-9.]+' | tr -d '\n'
   """
 }
 
@@ -68,13 +66,31 @@ process fastQC {
 process nanoPlot {
   label 'nanoplot'
 
+  when:
+  'nanoplot' in params.qc_tools
+
   output:
-  path('nanoplot_version.yaml')
+  tuple val('NanoPlot'), stdout
 
   script:
   """
-  version=\$(NanoPlot --version | grep -Eo '[0-9.]+') 
-  echo "NanoPlot: '\$version'" > nanoplot_version.yaml
+  NanoPlot --version | grep -Eo '[0-9.]+' | tr -d '\n'
+  """
+}
+
+
+process nanoq {
+  label 'nanoq'
+
+  when:
+  'nanoq' in params.qc_tools
+
+  output:
+  tuple val('nanoq'), stdout
+
+  script:
+  """
+  nanoq --version | grep -Eo '[0-9.]+' | tr -d '\n'
   """
 }
 
@@ -82,25 +98,48 @@ process nanoPlot {
 process pycoQC {
   label 'pycoqc'
 
+  when:
+  'pycoqc' in params.qc_tools
+
   output:
-  path('pycoqc_version.yaml')
+  tuple val('pycoQC'), stdout
 
   script:
   """
-  version=\$(pycoQC --version | grep -Eo '[0-9.]+') 
-  echo "PycoQC: '\$version'" > pycoqc_version.yaml
+  pycoQC --version | grep -Eo '[0-9.]+' | tr -d '\n'
+  """
+}
+
+
+process toulligQC {
+  label 'toulligqc'
+
+  when:
+  'toulligqc' in params.qc_tools
+  
+  output:
+  tuple val('toulligQC'), stdout
+  
+  script:
+  """
+  toulligqc --version | tr -d '\n'
   """
 }
 
 
 process doradoModel {
+  label 'samtools'
+
+  input:
+  path(bam)
+  
   output:
   path('dorado_model.tsv')
   
   script:
-  model_version = params.dorado_basecalling_model
   """
+  model_version=\$(samtools view -H ${bam} | grep -Po '(?<=basecall_model=)([^ ]+)' | uniq)
   echo "Software\tModel\tVersion" > dorado_model.tsv
-  echo "Dorado\tBasecalling\t${model_version}" >> dorado_model.tsv 
+  echo "Dorado\tBasecalling\t\${model_version}" >> dorado_model.tsv 
   """
 }

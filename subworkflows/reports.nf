@@ -1,4 +1,4 @@
-include { sanitizeFilename } from '../lib/groovy/utils.gvy'
+include { slugify } from '../lib/groovy/utils.gvy'
 
 
 workflow GenerateReports {
@@ -6,20 +6,25 @@ workflow GenerateReports {
     software_reports    // channel [file] | SW reports
     software_versions   // channel [file] | SW versions file
     model_versions      // channel [file] | SW model versions file
+    sequencing_summary  // channel [file] | Sequencing summary file
+    barcodes            // list [barcode]
+    pod5_data           // directory containing POD5 files
     multiqc_config      // multiqc config file
 
   main:
-    multiQC(software_reports, software_versions, model_versions, multiqc_config)
+    multiQC(software_reports, software_versions.collect(), model_versions.collect(), multiqc_config)
+    pycoQC(sequencing_summary)
+    toulligQC(pod5_data, sequencing_summary, barcodes)
 }
 
 
 process multiQC {
   label 'multiqc'
-  publishDir "${params.output_dir}/multiqc", mode: 'copy'
+  publishDir "${params.output_dir}/reports/multiqc", mode: 'copy'
   
   input:
   path(reports, stageAs: 'reports/*')
-  path('reports/versions/*_mqc_versions.yaml')
+  path('reports/versions/ont_demux_*_mqc_versions.yaml')
   path('reports/model_versions/model_versions_*.tsv')
   path('multiqc_config.yaml')
 
@@ -28,12 +33,78 @@ process multiQC {
 
   script:
   if (params.experiment_name) {
-    filename = sanitizeFilename("${params.experiment_name}_multiqc")
+    filename = slugify("${params.experiment_name}_multiqc")
     title_opts = "--title '${params.experiment_name} Report' --filename ${filename}"
   } else {
     title_opts = ''
   }
   """
   multiqc ${title_opts} reports
+  """
+}
+
+
+process toulligQC {
+  label 'toulligqc'
+  publishDir "${params.output_dir}/reports/toulligqc", mode: 'copy'
+  memory 4.GB
+
+  when:
+  'toulligqc' in params.qc_tools
+
+  input:
+  path(data_dir)
+  path('sequencing_summary.txt')
+  val(barcode_list)
+  
+  output:
+  path(report_filename)
+  tuple val('ToulligQC'), eval('toulligqc --version'), topic: versions
+  
+  script:
+  report_filename = "${slugify(params.experiment_name)}_toulligqc.html"
+  barcode_list = ["NB23", "NB24"]
+  barcodes_opt = barcode_list
+    ? "--barcoding --barcodes ${barcode_list.join(',')}"
+    : ''
+  """
+  sed 's/${params.dorado_demux_kit}_//' sequencing_summary.txt > sequencing_summary.mod.txt
+
+  toulligqc \
+    --sequencing-summary-source sequencing_summary.mod.txt \
+    --pod5-source ${data_dir} \
+    --html-report-path ${report_filename} \
+    --report-name ${params.experiment_name} \
+    --qscore-threshold ${params.qscore_filter} \
+    ${barcodes_opt}
+  """
+}
+
+
+process pycoQC {
+  label 'pycoqc'
+  publishDir "${params.output_dir}/reports/pycoqc", mode: 'copy'
+  memory { 8.GB * task.attempt }
+  errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+  maxRetries 3
+
+  when:
+  'pycoqc' in params.qc_tools
+
+  input:
+  path(sequencing_summary)
+  
+  output:
+  path('pycoQC_report.html')
+  
+  script:
+  title_opt = params.experiment_name
+    ? "--report_title '${params.experiment_name} Sequencing Report'"
+    : ''
+  """
+  pycoQC \
+    -f ${sequencing_summary} \
+    ${title_opt} \
+    -o pycoQC_report.html
   """
 }

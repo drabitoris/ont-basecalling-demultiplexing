@@ -4,10 +4,7 @@ workflow BasecallingAndDemux {
     data_dir      // directory containing POD5 files
 
   main:
-    basecalling(
-      data_dir,
-      downloadModel(params.dorado_basecalling_model)
-    )
+    basecalling(data_dir)
     qscoreFiltering(basecalling.out.reads)
       | mix
       | set { basecalled_reads_qscore_filtered }
@@ -38,24 +35,9 @@ workflow BasecallingAndDemux {
     }
 
   emit:
+    basecalled_ubam = basecalling.out.reads.map { it[1] }
     sequences = sequences_to_postprocess
     sequencing_summary = basecalling.out.sequencing_summary
-}
-
-
-process downloadModel {
-  label 'dorado'
-
-  input:
-  val(model_name)
-  
-  output:
-  path(model_name)
-  
-  script:
-  """
-  dorado download --model ${model_name}
-  """
 }
 
 
@@ -64,25 +46,31 @@ process basecalling {
   publishDir "${params.output_dir}/sequencing_info/", \
     pattern: 'sequencing_summary.txt', \
     mode: 'copy'
-  clusterOptions = "--gres=gpu:${params.dorado_basecalling_gpus}"
+  clusterOptions "--gres=gpu:${params.dorado_basecalling_gpus}"
   cpus { 4 * params.dorado_basecalling_gpus }
   memory "${16 * params.dorado_basecalling_gpus}G"
   
   input:
   path(data_dir)
-  path(basecalling_model)
 
   output:
   tuple val('basecalled'), path('basecalled.ubam'), emit: reads
   path('sequencing_summary.txt')                  , emit: sequencing_summary
 
   script:
+  if (params.skip_demultiplexing) {
+    demux_opts = ''
+  } else {
+    demux_opts = "--kit-name ${params.dorado_demux_kit}"
+    demux_opts += params.dorado_demux_both_ends ? ' --barcode-both-ends' : ''
+  }
   """
   dorado basecaller \
     --recursive \
     --device 'cuda:all' \
     ${params.dorado_basecalling_extra_config} \
-    ${basecalling_model} \
+    ${params.dorado_basecalling_model} \
+    ${demux_opts} \
     ${data_dir} \
   > basecalled.ubam
 
@@ -120,7 +108,7 @@ process qscoreFiltering {
 
 process demultiplexing {
   label 'dorado'
-  cpus params.dorado_demux_cpus
+  cpus 2
 
   input:
   tuple val(name), path(basecalled_reads)
@@ -130,13 +118,11 @@ process demultiplexing {
   path('demultiplexed/unclassified*'), emit: unclassified
 
   script:
-  both_ends = params.dorado_demux_both_ends ? '--barcode-both-ends' : ''
   emit_fastq = params.fastq_output ? '--emit-fastq' : ''
   """
   dorado demux \
     --output-dir demultiplexed/ \
-    --kit-name "${params.dorado_demux_kit}" \
-    ${both_ends} \
+    --no-classify \
     ${emit_fastq} \
     --threads ${task.cpus} \
     ${params.dorado_demux_extra_config} \
@@ -147,7 +133,7 @@ process demultiplexing {
 
 process gatherSequences {
   label 'pigz'
-  tag "${name}"
+  tag { name }
   publishDir "${params.output_dir}/demux/", mode: 'copy'
   cpus 4
 
@@ -171,7 +157,7 @@ process gatherSequences {
 
 process bamToFastq {
   label 'samtools'
-  tag "${name}"
+  tag { name }
   publishDir "${params.output_dir}/basecalled/", mode: 'copy'
   cpus 4
 
