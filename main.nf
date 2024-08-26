@@ -35,7 +35,7 @@ workflow {
     CollectVersions.out.software_versions,
     CollectVersions.out.model_versions,
     BasecallingAndDemux.out.sequencing_summary,
-    samples.map { it[0] }.collect(),
+    samples.map { it[0] }.collect().ifEmpty { [] },
     data_dir,
     multiqc_config
   )

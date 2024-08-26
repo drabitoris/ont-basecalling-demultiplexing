@@ -64,7 +64,7 @@ process toulligQC {
   script:
   report_filename = "${slugify(params.experiment_name)}_toulligqc.html"
   barcode_list = ["NB23", "NB24"]
-  barcodes_opt = barcode_list
+  barcodes_opt = !params.skip_demultiplexing && barcode_list
     ? "--barcoding --barcodes ${barcode_list.join(',')}"
     : ''
   """
