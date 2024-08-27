@@ -12,7 +12,7 @@ Uses Dorado for basecalling and demultiplexing.
 ## Quick Start
 1. Clone this repository:
 	```bash
-	git clone https://github.com/your-repo/ont-basecalling-demultiplexing.git
+	git clone https://github.com/catg-umag/ont-basecalling-demultiplexing
 	```
 2. Demultiplexing setup (optional):
 	- If demultiplexing is needed, create a samples.csv file containing at least the barcode and sample columns.
