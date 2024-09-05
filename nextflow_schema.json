@@ -7,7 +7,7 @@
   "properties": {
     "experiment_name": {
       "type": "string",
-      "description": "Name of the experiment, used for final reports (title and filename)."
+      "description": "Name of the experiment, used for reports (title and filename)."
     },
     "data_dir": {
       "type": "string",
@@ -20,7 +20,7 @@
       "format": "file-path",
       "schema": "/assets/samples_data_schema.json",
       "mimetype": "text/csv",
-      "description": "Path to the CSV file containing the sample data (if not provided, will not perform demux)."
+      "description": "Path to the CSV file containing the sample data (if not provided, will not perform demultiplexing)."
     },
     "output_dir": {
       "type": "string",

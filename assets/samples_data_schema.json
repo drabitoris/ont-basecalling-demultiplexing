@@ -6,6 +6,7 @@
     "properties": {
       "barcode": { "type": "string" },
       "sample": { "type": "string" }
-    }
+    },
+    "required": ["barcode", "sample"]
   }
 }

@@ -15,14 +15,14 @@ Uses Dorado for basecalling and demultiplexing.
 	git clone https://github.com/catg-umag/ont-basecalling-demultiplexing
 	```
 2. Demultiplexing setup (optional):
-	- If demultiplexing is needed, create a samples.csv file containing at least the barcode and sample columns.
+	- If demultiplexing is needed, create a `samples.csv` file containing at least the `barcode` and `sample` columns.
 	- Ensure the barcode column includes the barcode identifier (e.g., barcode01), and the sample column lists the sample name, which will be used in reports and as the FASTQ filename.
 3. Configure parameters:
 	- Copy the example parameters file:
 		```bash
 		cp params.example.yml my_params.yml
 		```
-	- Modify my_params.yml according to your needs. Ensure that the sample_data parameter points to your samples.csv file if you are demultiplexing.
+	- Modify my_params.yml according to your needs. Ensure that the `sample_data` parameter points to your `samples.csv` file if you are demultiplexing.
 4. Run the pipeline:
 	```bash
 	nextflow run ont-basecalling-demultiplexing/ -profile apptainer -params-file my_params.yml
@@ -30,20 +30,20 @@ Uses Dorado for basecalling and demultiplexing.
 
 ## Pipeline Parameters
 
-| Parameter                  | Required | Default                            | Description                                                                                     |
-| -------------------------- | -------- | ---------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `experiment_name`          | No       | -                                  | Name of the experiment, used for final reports (title and filename).                            |
-| `data_dir`                 | Yes      | -                                  | Path to the directory containing POD5 files.                                                    |
-| `sample_data`              | No       | -                                  | Path to the CSV file containing the sample data (if not provided, will not perform demux).      |
-| `output_dir`               | No       | `results`                          | Directory for saving results.                                                                   |
-| `fastq_output`             | No       | `true`                             | Generates FASTQ files if `true`; otherwise, generates UBAM files.                               |
-| `qscore_filter`            | No       | `10`                               | Minimum QScore threshold for "pass" data, used in demultiplexing.                               |
-| `dorado_basecalling_model` | No       | `sup`                              | Model used for basecalling. Check Dorado help for available options.                            |
-| `dorado_basecalling_gpus`  | No       | `1`                                | Number of GPUs to allocate for basecalling.                                                     |
-| `dorado_demux_kit`         | No       | `EXP-NBD196`                       | Kit identifier used for demultiplexing.                                                         |
-| `dorado_demux_both_ends`   | No       | `false`                            | Demultiplexes using barcodes on both ends (5' and 3') if `true`.                                |
-| `use_dorado_container`     | No       | `true`                             | Uses Dorado via container if `true`; expects a local installation if `false`.                   |
-| `qc_tools`                 | No       | `['fastqc', 'nanoq', 'toulligqc']` | Specifies which QC tools to run. Options: 'nanoq', 'nanoplot', 'fastqc', 'toulligqc', 'pycoqc'. |
+| Parameter                  | Required | Default                            | Description                                                                                         |
+| -------------------------- | -------- | ---------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `experiment_name`          | No       | -                                  | Name of the experiment, used for reports (title and filename).                                      |
+| `data_dir`                 | Yes      | -                                  | Path to the directory containing POD5 files.                                                        |
+| `sample_data`              | No       | -                                  | Path to the CSV file containing the sample data (if not provided, will not perform demultiplexing). |
+| `output_dir`               | No       | `results`                          | Directory for saving results.                                                                       |
+| `fastq_output`             | No       | `true`                             | Generates FASTQ files if `true`; otherwise, generates UBAM files.                                   |
+| `qscore_filter`            | No       | `10`                               | Minimum QScore threshold for "pass" data, used in demultiplexing.                                   |
+| `dorado_basecalling_model` | No       | `sup`                              | Model used for basecalling. Check Dorado help for available options.                                |
+| `dorado_basecalling_gpus`  | No       | `1`                                | Number of GPUs to allocate for basecalling.                                                         |
+| `dorado_demux_kit`         | No       | `EXP-NBD196`                       | Kit identifier used for demultiplexing.                                                             |
+| `dorado_demux_both_ends`   | No       | `false`                            | Demultiplexes using barcodes on both ends (5' and 3') if `true`.                                    |
+| `use_dorado_container`     | No       | `true`                             | Uses Dorado via container if `true`; expects a local installation if `false`.                       |
+| `qc_tools`                 | No       | `['fastqc', 'nanoq', 'toulligqc']` | Specifies which QC tools to run. Options: 'nanoq', 'nanoplot', 'fastqc', 'toulligqc', 'pycoqc'.     |
 
 ## Considerations
 
