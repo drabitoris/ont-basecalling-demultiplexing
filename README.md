@@ -48,5 +48,5 @@ Uses Dorado for basecalling and demultiplexing.
 ## Considerations
 
 - The pipeline is compatible with SLURM clusters; use `-profile slurm`.
-- GPU resources are required for basecalling. On SLURM, ensure jobs request GPUs with the `--gres=gpu:X` option.
+- GPU resources are required for basecalling. On SLURM, this pipeline will send jobs requesting GPUs with the `--gres=gpu:X` option.
 - You can provide extra args to dorado basecalling and demultiplexing using `ext.args`.
