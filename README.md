@@ -1,6 +1,6 @@
 # ONT Basecalling / Demux Pipeline
 
-Small pipeline to perform basecalling and (optional) demultiplexing of ONT data, collect QC metrics and generate a MultiQC report.
+Nextflow pipeline to perform basecalling and (optional) demultiplexing of ONT data, collect QC metrics and generate a MultiQC report.
 Uses Dorado for basecalling and demultiplexing.
 
 ## Requirements
@@ -35,7 +35,7 @@ Uses Dorado for basecalling and demultiplexing.
 | `experiment_name`          | No       | -                                  | Name of the experiment, used for final reports (title and filename).                            |
 | `data_dir`                 | Yes      | -                                  | Path to the directory containing POD5 files.                                                    |
 | `sample_data`              | No       | -                                  | Path to the CSV file containing the sample data (if not provided, will not perform demux).      |
-| `output_dir`               | No       | `demultiplex_results`              | Directory for saving results.                                                                   |
+| `output_dir`               | No       | `results`                          | Directory for saving results.                                                                   |
 | `fastq_output`             | No       | `true`                             | Generates FASTQ files if `true`; otherwise, generates UBAM files.                               |
 | `qscore_filter`            | No       | `10`                               | Minimum QScore threshold for "pass" data, used in demultiplexing.                               |
 | `dorado_basecalling_model` | No       | `sup`                              | Model used for basecalling. Check Dorado help for available options.                            |
