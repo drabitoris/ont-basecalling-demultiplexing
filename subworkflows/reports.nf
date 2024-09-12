@@ -47,7 +47,9 @@ process multiQC {
 process toulligQC {
   label 'toulligqc'
   publishDir "${params.output_dir}/reports/toulligqc", mode: 'copy'
-  memory 4.GB
+  memory { 8.GB * task.attempt }
+  errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'finish' }
+  maxRetries 3
 
   when:
   'toulligqc' in params.qc_tools
@@ -64,7 +66,7 @@ process toulligQC {
   script:
   if (params.experiment_name) {
     report_filename = "${slugify(params.experiment_name)}_toulligqc.html"
-    name_opt = "--report-name ${params.experiment_name}"
+    name_opt = "--report-name '${params.experiment_name}'"
   } else {
     report_filename = "toulligqc.html"
     name_opt = ''
