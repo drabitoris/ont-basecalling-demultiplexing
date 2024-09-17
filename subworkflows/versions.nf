@@ -1,7 +1,7 @@
 workflow CollectVersions {
 
   main:
-    (fastQC & nanoq & nanoPlot & pycoQC & toulligQC &)
+    (fastQC & nanoq & nanoPlot & pycoQC & toulligQC)
       | mix
       | set { software_versions }
 
