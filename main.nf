@@ -14,7 +14,8 @@ data = Channel
     .fromPath("${params.data_dir}/*")
     .map { file -> 
         def filename = file.getName()
-        return [filename, file]
+        def filenameWithoutExtension = filename.replaceAll(/\.[^\.]+$/, '')  // Remove file extension
+        return [filenameWithoutExtension, file]
     }
     .println()
 
