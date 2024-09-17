@@ -41,7 +41,7 @@ workflow {
     CollectVersions.out.model_versions,
     fol,
     samples.map { it[0] }.collect().ifEmpty { [] },
-    data_dir,
+    fol,
     multiqc_config
   )
 }
