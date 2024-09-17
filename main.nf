@@ -9,7 +9,14 @@ include { CollectVersions }                       from './subworkflows/versions.
 // validate and prepare input channels
 validateParameters()
 
-data_dir = file(params.data_dir, type: 'dir')
+// Create a Nextflow channel with filenames and files
+data
+    .fromPath("${params.data_dir}/*")
+    .map { file -> 
+        def filename = file.getName()
+        return [filename, file]
+    }
+    .println()
 multiqc_config = file("${workflow.projectDir}/tool_conf/multiqc_config.yaml", checkIfExists: true)
 
 if (params.sample_data) {
@@ -20,7 +27,7 @@ if (params.sample_data) {
 
 
 workflow {
-  QualityCheck(data_dir)
+  QualityCheck(data)
 
   CollectVersions()
 
