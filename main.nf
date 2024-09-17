@@ -17,6 +17,8 @@ data = Channel
         return [filename, file]
     }
     .println()
+
+fol = Channel.empty()
 multiqc_config = file("${workflow.projectDir}/tool_conf/multiqc_config.yaml", checkIfExists: true)
 
 if (params.sample_data) {
@@ -35,7 +37,7 @@ workflow {
     QualityCheck.out.software_reports,
     CollectVersions.out.software_versions,
     CollectVersions.out.model_versions,
-    null,
+    fol,
     samples.map { it[0] }.collect().ifEmpty { [] },
     data_dir,
     multiqc_config
