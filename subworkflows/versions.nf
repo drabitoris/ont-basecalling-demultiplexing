@@ -1,7 +1,7 @@
 workflow CollectVersions {
 
   main:
-    (fastQC & nanoq & nanoPlot & pycoQC & toulligQC)
+    (fastQC & nanoq & nanoPlot & pycoQC & toulligQC &)
       | mix
       | set { software_versions }
 
@@ -10,6 +10,7 @@ workflow CollectVersions {
           "${it[0]}: \"${it[1]}\""
         }
       | set { software_versions_combined }
+  doradoModel()
   
   emit:
     software_versions = software_versions_combined
@@ -125,16 +126,13 @@ process toulligQC {
 
 process doradoModel {
   label 'samtools'
-
-  input:
-  path(bam)
   
   output:
   path('dorado_model.tsv')
   
   script:
   """
-  model_version=\$(samtools view -H ${bam} | grep -Po '(?<=basecall_model=)([^ ]+)' | uniq)
+  model_version="blank"
   echo "Software\tModel\tVersion" > dorado_model.tsv
   echo "Dorado\tBasecalling\t\${model_version}" >> dorado_model.tsv 
   """
