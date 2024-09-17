@@ -10,7 +10,7 @@ include { CollectVersions }                       from './subworkflows/versions.
 validateParameters()
 
 // Create a Nextflow channel with filenames and files
-data
+data = Channel
     .fromPath("${params.data_dir}/*")
     .map { file -> 
         def filename = file.getName()
