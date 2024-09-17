@@ -13,7 +13,7 @@ workflow CollectVersions {
   
   emit:
     software_versions = software_versions_combined
-    model_versions = Channel.empty()
+    model_versions = Channel.of('default_string')
 }
 
 

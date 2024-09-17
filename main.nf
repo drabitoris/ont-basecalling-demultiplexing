@@ -19,7 +19,7 @@ data = Channel
     }
     .println()
 
-fol = Channel.empty()
+fol = Channel.of('default_string')
 multiqc_config = file("${workflow.projectDir}/tool_conf/multiqc_config.yaml", checkIfExists: true)
 
 if (params.sample_data) {
