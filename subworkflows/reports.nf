@@ -60,7 +60,7 @@ process toulligQC {
   
   output:
   path(report_filename)
-  tuple val('ToulligQC'), eval('toulligqc --version')
+  tuple val('ToulligQC'), val('toulligqc --version')
   
   script:
   if (params.experiment_name) {
