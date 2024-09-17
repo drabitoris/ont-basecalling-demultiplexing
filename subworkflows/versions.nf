@@ -14,7 +14,7 @@ workflow CollectVersions {
   
   emit:
     software_versions = software_versions_combined
-    model_versions = Channel.of('default_string')
+    model_versions = doradoModel.out
 }
 
 
