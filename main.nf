@@ -17,8 +17,9 @@ data = Channel
         def filenameWithoutExtension = filename.replaceAll(/\.[^\.]+$/, '')  // Remove file extension
         return [filenameWithoutExtension, file]
     }
-    .println()
-
+data.subscribe { element ->
+    println "DEBUG: Filename without extension: ${element[0]}, Full file path: ${element[1]}"
+}
 fol = Channel.of('default_string')
 multiqc_config = file("${workflow.projectDir}/tool_conf/multiqc_config.yaml", checkIfExists: true)
 
