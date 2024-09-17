@@ -20,17 +20,15 @@ if (params.sample_data) {
 
 
 workflow {
-  BasecallingAndDemux(samples, data_dir)
+  QualityCheck(data_dir)
 
-  QualityCheck(BasecallingAndDemux.out.sequences)
-
-  CollectVersions(BasecallingAndDemux.out.basecalled_ubam)
+  CollectVersions()
 
   GenerateReports(
     QualityCheck.out.software_reports,
     CollectVersions.out.software_versions,
     CollectVersions.out.model_versions,
-    BasecallingAndDemux.out.sequencing_summary,
+    null,
     samples.map { it[0] }.collect().ifEmpty { [] },
     data_dir,
     multiqc_config

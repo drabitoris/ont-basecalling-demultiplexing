@@ -1,9 +1,7 @@
 workflow CollectVersions {
-  take:
-    basecalled_ubam
 
   main:
-    (dorado & samtools & fastQC & nanoq & nanoPlot & pycoQC & toulligQC)
+    (fastQC & nanoq & nanoPlot & pycoQC & toulligQC)
       | mix
       | set { software_versions }
 
@@ -12,12 +10,10 @@ workflow CollectVersions {
           "${it[0]}: \"${it[1]}\""
         }
       | set { software_versions_combined }
-
-    doradoModel(basecalled_ubam)
   
   emit:
     software_versions = software_versions_combined
-    model_versions = doradoModel.out
+    model_versions = null
 }
 
 
