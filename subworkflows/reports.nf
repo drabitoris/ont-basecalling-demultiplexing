@@ -12,7 +12,7 @@ workflow GenerateReports {
     multiqc_config      // multiqc config file
 
   main:
-    multiQC(software_reports, software_versions.collect(), model_versions.collect(), multiqc_config)
+    multiQC(software_reports, software_versions.collect(), multiqc_config)
     pycoQC(sequencing_summary)
     toulligQC(pod5_data, sequencing_summary, barcodes)
 }
@@ -25,7 +25,6 @@ process multiQC {
   input:
   path(reports, stageAs: 'reports/*')
   path('reports/versions/ont_demux_*_mqc_versions.yaml')
-  path('reports/model_versions/model_versions_*.tsv')
   path('multiqc_config.yaml')
 
   output:
