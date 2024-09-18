@@ -11,7 +11,7 @@ validateParameters()
 
 pod5_dir = file(params.pod5_dir, type: 'dir')
 
-fasta_path = Channel.fromPath('${params.data_dir}/*')
+fasta_path = Channel.fromPath("${params.data_dir}/*")
 
 // Create a Nextflow channel with filenames and files
 data = Channel
