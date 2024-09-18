@@ -22,7 +22,7 @@ data = Channel
 data.subscribe { element ->
     println "DEBUG: Filename without extension: ${element[0]}, Full file path: ${element[1]}"
 }
-fol = Channel.of('default_string')
+fol = Channel.fromPath('assets/fol.txt')
 multiqc_config = file("${workflow.projectDir}/tool_conf/multiqc_config.yaml", checkIfExists: true)
 
 if (params.sample_data) {
