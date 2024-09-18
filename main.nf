@@ -9,6 +9,8 @@ include { CollectVersions }                       from './subworkflows/versions.
 // validate and prepare input channels
 validateParameters()
 
+pod5_dir = file(params.pod5_dir, type: 'dir')
+
 // Create a Nextflow channel with filenames and files
 data = Channel
     .fromPath("${params.data_dir}/*")
@@ -41,7 +43,7 @@ workflow {
     CollectVersions.out.model_versions,
     fol,
     samples.map { it[0] }.collect().ifEmpty { [] },
-    fol,
+    pod5_dir,
     multiqc_config
   )
 }
