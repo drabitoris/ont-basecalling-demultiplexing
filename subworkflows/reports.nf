@@ -74,11 +74,8 @@ process toulligQC {
     ? "--barcoding --barcodes ${barcode_list.join(',')}"
     : ''
   """
-  sed 's/${params.dorado_demux_kit}_//' sequencing_summary.txt > sequencing_summary.mod.txt
-
   toulligqc \
-    --sequencing-summary-source sequencing_summary.mod.txt \
-    --pod5-source ${data_dir} \
+    --fastq ${data_dir} \
     --html-report-path ${report_filename} \
     --qscore-threshold ${params.qscore_filter} \
     ${name_opt} \
