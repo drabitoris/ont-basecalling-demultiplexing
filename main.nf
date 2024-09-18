@@ -11,6 +11,20 @@ validateParameters()
 
 pod5_dir = file(params.pod5_dir, type: 'dir')
 
+fasta_path = Channel.fromPath('${params.data_dir}/*')
+
+// Example process that takes each file from the channel as input
+process make_fasta_path {
+    input:
+    path file_from_channel
+
+    script:
+    """
+    echo "Processing file: ${file_from_channel}"
+    cat ${file_from_channel}
+    """
+}
+
 // Create a Nextflow channel with filenames and files
 data = Channel
     .fromPath("${params.data_dir}/*")
@@ -43,7 +57,7 @@ workflow {
     CollectVersions.out.model_versions,
     fol,
     samples.map { it[0] }.collect().ifEmpty { [] },
-    pod5_dir,
+    make_fasta_path(fasta_path),
     multiqc_config
   )
 }
