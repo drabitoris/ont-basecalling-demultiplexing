@@ -54,6 +54,7 @@ process toulligQC {
   'toulligqc' in params.qc_tools
 
   input:
+  path(data_dir)
   path('sequencing_summary.txt')
   val(barcode_list)
   
@@ -77,6 +78,7 @@ process toulligQC {
 
   toulligqc \
     --sequencing-summary-source sequencing_summary.mod.txt \
+    --pod5-source ${data_dir} \
     --html-report-path ${report_filename} \
     --qscore-threshold ${params.qscore_filter} \
     ${name_opt} \
