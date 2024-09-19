@@ -14,11 +14,6 @@
       "description": "Path to the directory containing fasta files.",
       "format": "directory-path"
     },
-    "pod5_dir": {
-      "type": "string",
-      "description": "Path to the directory containing POD5 files.",
-      "format": "directory-path"
-    },
     "sample_data": {
       "type": "string",
       "default": "input/samples.csv",
