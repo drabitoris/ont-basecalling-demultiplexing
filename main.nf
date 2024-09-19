@@ -9,8 +9,6 @@ include { CollectVersions }                       from './subworkflows/versions.
 // validate and prepare input channels
 validateParameters()
 
-pod5_dir = file(params.pod5_dir, type: 'dir')
-
 fasta_path = Channel.fromPath("${params.data_dir}/*")
 
 // Create a Nextflow channel with filenames and files
