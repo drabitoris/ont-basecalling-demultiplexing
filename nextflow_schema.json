@@ -11,7 +11,7 @@
     },
     "data_dir": {
       "type": "string",
-      "description": "Path to the directory containing fasta files.",
+      "description": "Path to the directory containing POD5 files.",
       "format": "directory-path"
     },
     "sample_data": {
@@ -43,7 +43,7 @@
       "description": "Model used for basecalling. Check Dorado help for available options."
     },
     "dorado_basecalling_gpus": {
-      "type": "integer",
+      "type": "string",
       "default": 1,
       "description": "Number of GPUs to allocate for basecalling."
     },
